@@ -1,0 +1,17 @@
+{
+  "name": "paypal-dispute-agent",
+  "version": "1.0.0",
+  "description": "Ontvangt PayPal dispute webhooks en mailt de klant automatisch",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "nodemailer": "^6.9.14",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
