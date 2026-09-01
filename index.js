@@ -91,25 +91,47 @@ const STORE_NAME = 'Halcyon Label';
 // https://developer.paypal.com/docs/api/customer-disputes/v1/#definition-reason
 const TEMPLATES = {
   MERCHANDISE_OR_SERVICE_NOT_RECEIVED: (disputeId) => ({
-    subject: `Ihre PayPal-Reklamation (${disputeId})`,
+    subject: `Ihr PayPal-Konflikt – Bestellung nicht erhalten`,
     text: `Guten Tag,
 
-wir haben festgestellt, dass Sie über PayPal einen Konflikt mit dem Grund „Artikel nicht erhalten" (Item Not Received) zu Ihrer Bestellung eröffnet haben.
+wir haben festgestellt, dass Sie über PayPal einen Konflikt mit dem Grund „Artikel nicht erhalten" (Item Not Received) eröffnet haben.
 
-Wir möchten uns zunächst kurz bei Ihnen melden, um zu prüfen, ob dieser Konflikt zum jetzigen Zeitpunkt noch relevant ist.
+Wir haben selbstverständlich Verständnis dafür, dass Sie einen Konflikt eröffnen, wenn Ihre Bestellung nicht rechtzeitig oder nicht bei Ihnen eingetroffen ist. Daher möchten wir gerne überprüfen, ob dieser Konflikt zum jetzigen Zeitpunkt noch relevant ist.
 
-Wurde Ihre Bestellung inzwischen zugestellt? Falls Sie Ihre Bestellung mittlerweile erhalten haben, bitten wir Sie höflich, den PayPal-Konflikt zu schließen. Wenn eine Bestellung inzwischen zugestellt wurde, ist es wichtig, dass der Status der Zahlung und des damit verbundenen Konflikts entsprechend aktualisiert wird.
+Wurde Ihre Bestellung inzwischen zugestellt?
+Falls Sie Ihre Bestellung mittlerweile erhalten haben, bitten wir Sie höflich, den PayPal-Konflikt zu schließen. Wenn eine Bestellung inzwischen zugestellt wurde, ist es wichtig, dass der Status der Zahlung und des damit verbundenen Konflikts entsprechend aktualisiert wird.
 
 Ein weiterhin offener Konflikt, obwohl die Bestellung bereits zugestellt wurde, kann unnötige Folgen haben. PayPal kann einen offenen Konflikt bei der Bewertung der Transaktion berücksichtigen. Dies kann unter Umständen zu einer Rückerstattung, einer Einschränkung der Zahlung oder weiteren Maßnahmen im Zusammenhang mit der Transaktion führen. Außerdem kann ein nicht mehr aktueller Konflikt die weitere Bearbeitung Ihrer Bestellung unnötig verzögern.
 
-Haben Sie Ihre Bestellung noch nicht erhalten? Dann teilen Sie uns dies bitte mit. Wir helfen Ihnen gerne dabei, den Verbleib Ihrer Sendung zu überprüfen und gemeinsam eine passende Lösung zu finden.
+Haben Sie Ihre Bestellung noch nicht erhalten?
+Dann teilen Sie uns dies bitte mit. Wir helfen Ihnen gerne dabei, den Verbleib Ihrer Sendung zu überprüfen und gemeinsam eine passende Lösung zu finden.
 
 Falls Ihre Bestellung inzwischen zugestellt wurde, bitten wir Sie, den Konflikt so schnell wie möglich bei PayPal zu schließen. Dadurch können unnötige Verzögerungen oder weitere Schritte im Rahmen des Konfliktverfahrens vermieden werden.
 
 Vielen Dank für Ihre Mithilfe und Ihr Verständnis.
+Mit freundlichen Grüßen
+
+${STORE_NAME} Kundenservice`
+  }),
+  MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED: (disputeId) => ({
+    subject: `Eine schnelle und unkomplizierte Lösung für Ihre Beschwerde`,
+    text: `Guten Tag,
+
+wir sehen, dass Sie einen Fall über PayPal eröffnet haben.
+
+Um Ihr Anliegen schneller, einfacher und vorteilhafter zu lösen, möchten wir Ihnen anbieten, den Fall direkt mit uns zu klären.
+
+Wir bieten Ihnen 30 % Rückerstattung des gesamten Kaufbetrags an, während Sie das Produkt behalten dürfen.
+
+Dies ist die effizienteste Lösung: Sie erhalten schnell eine finanzielle Erstattung, müssen das Produkt nicht zurücksenden und vermeiden eine möglicherweise langwierige Bearbeitung über PayPal.
+
+Zudem ist dies die nachhaltigere Lösung, da das Produkt weiterhin von Ihnen oder einer anderen Person genutzt werden kann.
+
+Bitte teilen Sie uns mit, ob diese Lösung für Sie akzeptabel ist. Bei Zustimmung veranlassen wir die Rückerstattung schnellstmöglich.
 
 Mit freundlichen Grüßen
-${STORE_NAME} Kundenservice`
+
+${STORE_NAME} team`
   })
 };
 
