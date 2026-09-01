@@ -19,7 +19,8 @@ const {
   SMTP_USER,
   SMTP_PASS,
   FROM_EMAIL,
-  PORT
+  PORT,
+  SKIP_SIGNATURE_VERIFICATION // "true" = alleen voor testen met de PayPal Webhook Simulator, NIET gebruiken in productie
 } = process.env;
 
 const PAYPAL_BASE_URL = PAYPAL_MODE === 'live'
@@ -84,23 +85,54 @@ async function getDisputeDetails(disputeId, accessToken) {
 }
 
 // --- Email content ---
+const STORE_NAME = 'Halcyon Label';
+
+// Per dispute-reden een eigen template. PayPal's reason-codes:
+// https://developer.paypal.com/docs/api/customer-disputes/v1/#definition-reason
+const TEMPLATES = {
+  MERCHANDISE_OR_SERVICE_NOT_RECEIVED: (disputeId) => ({
+    subject: `Ihre PayPal-Reklamation (${disputeId})`,
+    text: `Guten Tag,
+
+wir haben festgestellt, dass Sie über PayPal einen Konflikt mit dem Grund „Artikel nicht erhalten" (Item Not Received) zu Ihrer Bestellung eröffnet haben.
+
+Wir möchten uns zunächst kurz bei Ihnen melden, um zu prüfen, ob dieser Konflikt zum jetzigen Zeitpunkt noch relevant ist.
+
+Wurde Ihre Bestellung inzwischen zugestellt? Falls Sie Ihre Bestellung mittlerweile erhalten haben, bitten wir Sie höflich, den PayPal-Konflikt zu schließen. Wenn eine Bestellung inzwischen zugestellt wurde, ist es wichtig, dass der Status der Zahlung und des damit verbundenen Konflikts entsprechend aktualisiert wird.
+
+Ein weiterhin offener Konflikt, obwohl die Bestellung bereits zugestellt wurde, kann unnötige Folgen haben. PayPal kann einen offenen Konflikt bei der Bewertung der Transaktion berücksichtigen. Dies kann unter Umständen zu einer Rückerstattung, einer Einschränkung der Zahlung oder weiteren Maßnahmen im Zusammenhang mit der Transaktion führen. Außerdem kann ein nicht mehr aktueller Konflikt die weitere Bearbeitung Ihrer Bestellung unnötig verzögern.
+
+Haben Sie Ihre Bestellung noch nicht erhalten? Dann teilen Sie uns dies bitte mit. Wir helfen Ihnen gerne dabei, den Verbleib Ihrer Sendung zu überprüfen und gemeinsam eine passende Lösung zu finden.
+
+Falls Ihre Bestellung inzwischen zugestellt wurde, bitten wir Sie, den Konflikt so schnell wie möglich bei PayPal zu schließen. Dadurch können unnötige Verzögerungen oder weitere Schritte im Rahmen des Konfliktverfahrens vermieden werden.
+
+Vielen Dank für Ihre Mithilfe und Ihr Verständnis.
+
+Mit freundlichen Grüßen
+${STORE_NAME} Kundenservice`
+  })
+};
+
 function buildDisputeEmail(dispute) {
   const disputeId = dispute.dispute_id;
-  const reason = dispute.reason || 'onbekende reden';
-  const amount = dispute.disputed_transactions?.[0]?.seller_transaction_id
-    ? dispute.disputed_transactions[0]
-    : null;
+  const reason = dispute.reason || 'ONKNOWN';
   const buyerEmail = dispute.disputed_transactions?.[0]?.buyer?.email;
 
-  const subject = `Betreft je bestelling — geschil ${disputeId}`;
-  const text = `Beste klant,
+  const template = TEMPLATES[reason];
+  const { subject, text } = template
+    ? template(disputeId)
+    : {
+        subject: `Betreft je bestelling — geschil ${disputeId}`,
+        text: `Beste klant,
 
 We hebben gezien dat er een geschil (${disputeId}) is geopend over je bestelling.
 Reden: ${reason}
 
 We nemen dit serieus en pakken het zo snel mogelijk op. Heb je nog vragen of aanvullende informatie, reply gerust op deze mail.
 
-Met vriendelijke groet`;
+Met vriendelijke groet
+${STORE_NAME}`
+      };
 
   return { to: buyerEmail, subject, text };
 }
@@ -109,11 +141,15 @@ Met vriendelijke groet`;
 app.post('/paypal/webhook', async (req, res) => {
   try {
     const accessToken = await getPayPalAccessToken();
-    const isValid = await verifyWebhookSignature(req.headers, req.body, accessToken);
 
-    if (!isValid) {
-      console.warn('Ongeldige webhook-signature ontvangen, genegeerd.');
-      return res.status(400).send('Invalid signature');
+    if (SKIP_SIGNATURE_VERIFICATION === 'true') {
+      console.warn('LET OP: signature-verificatie is uitgeschakeld (alleen voor testen).');
+    } else {
+      const isValid = await verifyWebhookSignature(req.headers, req.body, accessToken);
+      if (!isValid) {
+        console.warn('Ongeldige webhook-signature ontvangen, genegeerd.');
+        return res.status(400).send('Invalid signature');
+      }
     }
 
     const event = req.body;
